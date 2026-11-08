@@ -26,7 +26,8 @@ PluginComponent {
             return Theme.warning;
         return limited ? Theme.primary : Theme.widgetIconColor;
     }
-    readonly property string pillText: daemon && limited && showLimit && status !== "setup" ? daemon.displayLimit + "%" : ""
+    readonly property bool pillShowsLimit: daemon !== null && limited && showLimit && status !== "setup"
+    readonly property string pillText: pillShowsLimit ? I18n.trFor("frameworkChargeProtection", "%1%").arg(daemon.displayLimit) : ""
 
     // Opens this widget's popout, bypassing pillClickAction.
     function openPanel() {
@@ -164,7 +165,7 @@ PluginComponent {
             StyledText {
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible: text.length > 0
-                text: root.pillText.replace("%", "")
+                text: root.pillShowsLimit ? String(root.daemon.displayLimit) : ""
                 font.pixelSize: root.textSize
                 color: Theme.widgetTextColor
             }

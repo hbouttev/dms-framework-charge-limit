@@ -28,7 +28,9 @@ This is a community plugin, not affiliated with Framework Computer.
   [release binary](https://github.com/FrameworkComputer/framework-system/releases) copied to
   `/usr/local/bin` as root). A copy in your home directory is never used.
 - polkit (`pkexec`, `pkcheck`) and a polkit agent: DMS is one.
-- bash. DMS 2.1 or later.
+- bash and util-linux (`flock`). DMS 2.1 or later.
+- A writable `/usr/local` and `/usr/share/polkit-1/actions`: the helper installer does not
+  support NixOS or image-based systems with a read-only `/usr`.
 
 Tested on a Framework Laptop 13 Pro (Intel Core Ultra Series 3), BIOS 03.04, CachyOS, with
 framework-system 0.6.6.

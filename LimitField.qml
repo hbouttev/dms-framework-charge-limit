@@ -42,6 +42,12 @@ Row {
     }
     Component.onCompleted: field.text = String(value)
 
+    StyledTextMetrics {
+        id: digits
+        font.pixelSize: field.font.pixelSize
+        text: "00"
+    }
+
     DActionButton {
         anchors.verticalCenter: parent.verticalCenter
         iconName: "remove"
@@ -54,7 +60,7 @@ Row {
     DTextField {
         id: field
         anchors.verticalCenter: parent.verticalCenter
-        width: 64
+        width: digits.advanceWidth + leftPadding + rightPadding + Theme.spacingS
         enabled: root.enabled
         maximumLength: 2
         validator: RegularExpressionValidator {

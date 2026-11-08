@@ -14,6 +14,6 @@
     "settings": "./ChargeSettings.qml",
     "startupCheck": "./StartupCheck.qml",
     "requires_dms": ">=2.1.0",
-    "dependencies": ["framework-system (framework_tool)", "polkit (pkexec, pkcheck)", "bash"],
+    "dependencies": ["framework-system (framework_tool)", "polkit (pkexec, pkcheck)", "bash", "util-linux (flock)"],
     "permissions": ["settings_read", "settings_write", "process"]
 }
