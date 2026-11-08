@@ -9,10 +9,14 @@ of Framework laptops from the bar, the Control Center and the settings page:
 - optionally, your choice is set again once after each boot, since the firmware applies its own
   charge limit setting at startup.
 
-It works where DMS's own charge limit setting cannot: many Framework kernels expose no
-`charge_control_end_threshold` file, but the EC is reachable through `/dev/cros_ec`, which
-Framework's official [`framework_tool`](https://github.com/FrameworkComputer/framework-system)
-uses. The plugin runs that tool through a small root helper (see [Privileges](#privileges)).
+It works where DMS's own charge limit setting cannot. That setting writes the kernel's
+`charge_control_end_threshold` file, which Linux does not create on Framework laptops: the
+`cros_charge_control` driver refuses to load there by default, because Framework's EC has its
+own charge limit command, used by the BIOS setting, that can override the generic one (the
+kernel log says "Framework charge control detected, preventing load"). This plugin uses
+Framework's command, through Framework's official
+[`framework_tool`](https://github.com/FrameworkComputer/framework-system), run by a small root
+helper (see [Privileges](#privileges)).
 
 This is a community plugin, not affiliated with Framework Computer.
 
