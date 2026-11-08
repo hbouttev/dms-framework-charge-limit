@@ -5,6 +5,74 @@
 //
 // No user-facing wording either: functions return codes and values, and ChargeTexts.qml
 // turns them into translatable text (I18n.trFor only works, and is only extracted, in QML).
+//
+// Types are written as JSDoc for editors and `tsc --checkJs`; QML ignores them.
+
+// ---- Types --------------------------------------------------------------------------
+
+/**
+ * Installation state of the system helper, from {@link helperState}.
+ * @typedef {"probing" | "no-polkit" | "missing" | "broken" | "outdated" | "installed"} HelperState
+ */
+
+/**
+ * What a helper or install.sh run was doing, for {@link failureCode}.
+ * @typedef {"read" | "write" | "install" | "uninstall"} Operation
+ */
+
+/**
+ * Why an operation failed, from {@link failureCode}; ChargeTexts.qml turns it into text.
+ * @typedef {"invalid" | "not-root" | "no-tool" | "ec" | "mismatch" | "busy" | "policy-missing"
+ *     | "not-authorized" | "timeout" | "cancelled" | "auth-failed" | "failed"} FailureCode
+ */
+
+/**
+ * Meaning of a raw EC maximum, from {@link classifyLimit}.
+ * @typedef {"unknown" | "full" | "limited" | "unexpected"} LimitKind
+ */
+
+/**
+ * What the probe found on the system, from {@link parseProbe}.
+ * @typedef {object} Probe
+ * @property {number} installedVersion version of the installed helper, 0 when absent
+ * @property {boolean} policy the polkit action file is installed
+ * @property {boolean} polkit polkit's actions directory exists
+ * @property {boolean} pkexec pkexec is in PATH
+ * @property {string} tool path of the trusted framework_tool, empty when none exists
+ * @property {number} bundledVersion version of the helper shipped with the plugin
+ */
+
+/**
+ * Translated texts the lifecycle script shows in notifications.
+ * @typedef {object} LifecycleTexts
+ * @property {string} title notification title and app name
+ * @property {string} resetOk after the maximum was set back to 100%
+ * @property {string} resetFailed when that failed
+ * @property {string} question offer to remove the helper after an uninstall
+ * @property {string} removeLabel action button that removes it
+ * @property {string} keepLabel action button that keeps it
+ * @property {string} removed after the helper was removed
+ */
+
+/**
+ * The plugin's view of the charge limit, passed to {@link reconcile} and
+ * {@link bootRestoreTarget}.
+ * @typedef {object} LimitState
+ * @property {number | null} raw maximum read from the EC, null when not read
+ * @property {boolean | null} selectedEnabled the user's "Limit charging" choice, null when
+ *     never known
+ * @property {number} protectedLimit the user's maximum when enabled, 25–99
+ * @property {boolean} [keepEnforcing] write the choice back instead of following changes
+ */
+
+/**
+ * Decision of {@link reconcile}.
+ * @typedef {{ action: "none" }
+ *     | { action: "adopt", enabled: boolean, limit: number }
+ *     | { action: "enforce", target: number }} Reconciliation
+ */
+
+// ---- Constants ----------------------------------------------------------------------
 
 // framework_tool accepts 25–100. 100 is what turning "Limit charging" off writes, so the
 // protected limit stops at 99: enabled at 100 would mean the same as disabled.
@@ -43,6 +111,7 @@ const EXIT = {
     pkexecFailed: 127
 };
 
+/** Choices of the "Check every" setting, in minutes. */
 const POLL_MINUTES = [1, 2, 5, 15, 30, 60];
 const DEFAULT_POLL_MINUTES = 5;
 
@@ -54,11 +123,21 @@ const DEFAULT_POLL_MINUTES = 5;
 // pkexec rejects a $SHELL missing from /etc/shells, hence the unset.
 const GUARD_SCRIPT = 'unset SHELL; [ -f "$1" ] || exit 120; pkcheck --action-id "$2" --process $$ >/dev/null 2>&1 || exit 121; shift 2; exec pkexec "$@"';
 
+/**
+ * Command line running the installed helper as root, never asking for a password.
+ * @param {string[]} args helper arguments: `["get"]` or `["set", "80"]`
+ * @returns {string[]}
+ */
 function helperCommand(args) {
     return ["sh", "-c", GUARD_SCRIPT, "sh", POLICY_PATH, POLKIT_ACTION, HELPER_PATH, ...args];
 }
 
-// Installs or removes the helper; pkexec asks for an administrator password.
+/**
+ * Command line installing or removing the helper; pkexec asks for an administrator password.
+ * @param {string} installScript path of the plugin's helper/install.sh
+ * @param {"install" | "uninstall"} mode
+ * @returns {string[]}
+ */
 function installCommand(installScript, mode) {
     return ["env", "-u", "SHELL", "pkexec", "/bin/bash", installScript, mode];
 }
@@ -74,6 +153,11 @@ const PROBE_SCRIPT = [
     'exit 0'
 ].join("; ");
 
+/**
+ * Command line of the probe; its output goes to {@link parseProbe}.
+ * @param {string} bundledHelper path of the plugin's helper/charge-limit
+ * @returns {string[]}
+ */
 function probeCommand(bundledHelper) {
     return ["sh", "-c", PROBE_SCRIPT, "sh", HELPER_PATH, POLICY_PATH, bundledHelper];
 }
@@ -100,13 +184,27 @@ const LIFECYCLE_SCRIPT = [
     'exit 0'
 ].join("\n");
 
+/**
+ * Command line of the lifecycle script, started detached when the daemon is destroyed.
+ * @param {boolean} reset set the maximum back to 100% if the plugin was disabled or
+ *     uninstalled
+ * @param {string} pluginId
+ * @param {LifecycleTexts} texts
+ * @returns {string[]}
+ */
 function lifecycleCommand(reset, pluginId, texts) {
     return ["sh", "-c", LIFECYCLE_SCRIPT, "sh", reset ? "1" : "0", pluginId, texts.title, texts.resetOk, texts.resetFailed, texts.question, texts.removeLabel, texts.keepLabel, texts.removed, GUARD_SCRIPT];
 }
 
 // ---- Parsing ------------------------------------------------------------------------
 
+/**
+ * The `key=value` lines of a helper or probe output. Other lines are ignored.
+ * @param {string | null | undefined} text
+ * @returns {Record<string, string>}
+ */
 function parseKeyValues(text) {
+    /** @type {Record<string, string>} */
     const out = {};
     for (const line of String(text ?? "").split("\n")) {
         const m = /^([a-z][a-z0-9_.]*)=(.*)$/.exec(line.trim());
@@ -116,15 +214,28 @@ function parseKeyValues(text) {
     return out;
 }
 
+/**
+ * A whole number of 1 to 3 digits, or null.
+ * @param {string | null | undefined} value
+ * @returns {number | null}
+ */
 function parseIntStrict(value) {
     return /^\d{1,3}$/.test(String(value ?? "")) ? Number(value) : null;
 }
 
-// The limit= line of the helper, or null.
+/**
+ * The `limit=` line of the helper, or null.
+ * @param {string | null | undefined} text helper stdout
+ * @returns {number | null}
+ */
 function parseLimit(text) {
     return parseIntStrict(parseKeyValues(text).limit);
 }
 
+/**
+ * @param {string | null | undefined} text output of {@link probeCommand}
+ * @returns {Probe}
+ */
 function parseProbe(text) {
     const kv = parseKeyValues(text);
     return {
@@ -138,8 +249,12 @@ function parseProbe(text) {
     };
 }
 
-// "probing", "no-polkit", "missing", "broken" (partly installed, or too old to use),
-// "outdated" (usable, update available) or "installed".
+/**
+ * "probing" (no probe yet), "no-polkit", "missing", "broken" (partly installed, or too old
+ * to use), "outdated" (usable, update available) or "installed".
+ * @param {Probe | null} probe
+ * @returns {HelperState}
+ */
 function helperState(probe) {
     if (!probe)
         return "probing";
@@ -151,11 +266,20 @@ function helperState(probe) {
     return v < HELPER_VERSION ? "outdated" : "installed";
 }
 
+/**
+ * Whether the installed helper can read and write the limit.
+ * @param {HelperState} state
+ * @returns {boolean}
+ */
 function helperUsable(state) {
     return state === "installed" || state === "outdated";
 }
 
-// The error= line of the helper, or the last line of the output.
+/**
+ * The `error=` line of the helper, or the last line of the output; at most 300 characters.
+ * @param {string | null | undefined} stderr
+ * @returns {string}
+ */
 function errorDetail(stderr) {
     const text = String(stderr ?? "");
     const kv = parseKeyValues(text);
@@ -165,7 +289,14 @@ function errorDetail(stderr) {
     return lines.length > 0 ? lines[lines.length - 1].slice(0, 300) : "";
 }
 
-// Failure code of a helper run (op: "read" or "write") or of install.sh ("install").
+/**
+ * Failure code of a helper or install.sh run that did not exit with 0.
+ * pkexec's 126/127 mean a dismissed or failed password prompt for install and uninstall,
+ * which ask for one; for read and write, which must not, they mean polkit refused.
+ * @param {number} exitCode
+ * @param {Operation} op
+ * @returns {FailureCode}
+ */
 function failureCode(exitCode, op) {
     switch (exitCode) {
     case EXIT.usage:
@@ -197,11 +328,20 @@ function failureCode(exitCode, op) {
 
 // ---- Limits -------------------------------------------------------------------------
 
+/**
+ * Whether `n` is a valid "Maximum charge when enabled": a whole number from 25 to 99.
+ * @param {number | null} n
+ * @returns {n is number}
+ */
 function isProtectedLimit(n) {
-    return Number.isInteger(n) && n >= MIN_LIMIT && n <= MAX_PROTECTED_LIMIT;
+    return typeof n === "number" && Number.isInteger(n) && n >= MIN_LIMIT && n <= MAX_PROTECTED_LIMIT;
 }
 
-// Whole number typed in the limit field, optionally followed by "%"; null unless 25–99.
+/**
+ * Whole number typed in the limit field, optionally followed by "%"; null unless 25–99.
+ * @param {string | null | undefined} text
+ * @returns {number | null}
+ */
 function parseLimitInput(text) {
     const m = /^\s*(\d{1,3})\s*%?\s*$/.exec(String(text ?? ""));
     if (!m)
@@ -210,25 +350,44 @@ function parseLimitInput(text) {
     return isProtectedLimit(n) ? n : null;
 }
 
+/**
+ * A saved protected limit, or the default when it is missing or invalid.
+ * @param {unknown} value value read from the plugin settings
+ * @returns {number}
+ */
 function normalizeProtectedLimit(value) {
     const n = Number(value);
     return isProtectedLimit(n) ? n : DEFAULT_LIMIT;
 }
 
+/**
+ * A saved poll interval, or the default when it is not one of {@link POLL_MINUTES}.
+ * @param {unknown} value value read from the plugin settings (a string)
+ * @returns {number}
+ */
 function normalizePollMinutes(value) {
     const n = Number(value);
     return POLL_MINUTES.includes(n) ? n : DEFAULT_POLL_MINUTES;
 }
 
-// What the hardware maximum should be.
+/**
+ * What the hardware maximum should be.
+ * @param {boolean} enabled "Limit charging"
+ * @param {number} protectedLimit
+ * @returns {number}
+ */
 function targetLimit(enabled, protectedLimit) {
     return enabled ? protectedLimit : FULL_CHARGE;
 }
 
-// "unknown" (not read), "full" (no limit: 100, or 0 when disabled in the EC), "limited"
-// (20–99) or "unexpected".
+/**
+ * "unknown" (not read), "full" (no limit: 100, or 0 when disabled in the EC), "limited"
+ * (20–99) or "unexpected".
+ * @param {number | null} raw maximum read from the EC
+ * @returns {LimitKind}
+ */
 function classifyLimit(raw) {
-    if (!Number.isInteger(raw))
+    if (typeof raw !== "number" || !Number.isInteger(raw))
         return "unknown";
     if (raw === 0 || raw === FULL_CHARGE)
         return "full";
@@ -237,7 +396,11 @@ function classifyLimit(raw) {
     return "unexpected";
 }
 
-// Maximum charge the EC applies, or null when unknown or unexpected.
+/**
+ * Maximum charge the EC applies, or null when unknown or unexpected.
+ * @param {number | null} raw maximum read from the EC
+ * @returns {number | null}
+ */
 function effectiveMax(raw) {
     switch (classifyLimit(raw)) {
     case "full":
@@ -249,16 +412,22 @@ function effectiveMax(raw) {
     }
 }
 
-// What to do after reading the EC outside a write of this plugin:
-// - "none": the hardware matches the selection, or its value is not understood;
-// - "adopt": follow a change made elsewhere (enabled, limit). A limit outside 25–99 keeps
-//   the saved protected limit, so it is never rounded into the field;
-// - "enforce": write `target` back ("Keep enforcing this limit").
-// selectedEnabled is null before the first read: the hardware is adopted as is.
+/**
+ * What to do after reading the EC outside a write of this plugin:
+ * - "none": the hardware matches the selection, or its value is not understood;
+ * - "adopt": follow a change made elsewhere (enabled, limit). A limit outside 25–99 keeps
+ *   the saved protected limit, so it is never rounded into the field;
+ * - "enforce": write `target` back ("Keep enforcing this limit").
+ *
+ * selectedEnabled is null before the first read: the hardware is adopted as is.
+ * @param {LimitState} state
+ * @returns {Reconciliation}
+ */
 function reconcile({ raw, selectedEnabled, protectedLimit, keepEnforcing }) {
     const kind = classifyLimit(raw);
     if (kind !== "full" && kind !== "limited")
         return { action: "none" };
+    /** @type {Reconciliation} */
     const adopt = {
         action: "adopt",
         enabled: kind === "limited",
@@ -272,7 +441,12 @@ function reconcile({ raw, selectedEnabled, protectedLimit, keepEnforcing }) {
     return keepEnforcing ? { action: "enforce", target } : adopt;
 }
 
-// Limit to write once after a new boot, or null when nothing needs to change.
+/**
+ * Limit to write once after a new boot, or null when nothing needs to change or the
+ * user's choice was never known.
+ * @param {LimitState} state
+ * @returns {number | null}
+ */
 function bootRestoreTarget({ raw, selectedEnabled, protectedLimit }) {
     if (selectedEnabled !== true && selectedEnabled !== false)
         return null;
@@ -280,14 +454,26 @@ function bootRestoreTarget({ raw, selectedEnabled, protectedLimit }) {
     return effectiveMax(raw) === target ? null : target;
 }
 
+/**
+ * Whether the system booted since the boot the plugin last handled.
+ * @param {string | null | undefined} savedBootId boot id saved in the plugin state
+ * @param {string} currentBootId content of /proc/sys/kernel/random/boot_id, empty when
+ *     unreadable
+ * @returns {boolean}
+ */
 function isNewBoot(savedBootId, currentBootId) {
     return !!currentBootId && savedBootId !== currentBootId;
 }
 
 // ---- Scheduling ---------------------------------------------------------------------
 
-// Delay before the next background read: the poll interval, or sooner after failures
-// (30 s, 1, 2, 4… min, capped at the interval).
+/**
+ * Delay before the next background read: the poll interval, or sooner after failures
+ * (30 s, 1, 2, 4… min, capped at the interval).
+ * @param {number} errorStreak consecutive failed reads
+ * @param {number} pollMs poll interval
+ * @returns {number} milliseconds
+ */
 function nextReadDelayMs(errorStreak, pollMs) {
     if (errorStreak <= 0)
         return pollMs;
@@ -302,6 +488,12 @@ const BOOT_RETRY_DELAYS_MS = [5000, 15000, 30000, 60000, 120000];
 const CONFLICT_WINDOW_MS = 60 * 60 * 1000;
 const CONFLICT_CORRECTIONS = 2;
 
+/**
+ * The enforcement corrections made within {@link CONFLICT_WINDOW_MS} of `now`.
+ * @param {number[]} timestamps times of past corrections, in ms since the epoch
+ * @param {number} now
+ * @returns {number[]}
+ */
 function recentCorrections(timestamps, now) {
     return timestamps.filter(t => now - t < CONFLICT_WINDOW_MS);
 }

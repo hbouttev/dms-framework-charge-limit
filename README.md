@@ -167,11 +167,13 @@ Neither changes the charge limit or removes framework-system.
 
 ```sh
 node tests/run.mjs                                  # logic and helper tests (fake framework_tool)
+node tests/typecheck.mjs                            # JSDoc types (TypeScript through npx)
 dms ipc call plugins reload frameworkChargeLimit
 ```
 
 [`logic/ChargeLimit.js`](logic/ChargeLimit.js) holds the pure logic (parsing, classification,
-reconciliation, commands); `ChargeDaemon.qml` owns all state and hardware access;
+reconciliation, commands), typed with JSDoc and checked by editors through `jsconfig.json`;
+`ChargeDaemon.qml` owns all state and hardware access;
 `ChargeWidget.qml` (bar and Control Center), `ChargeSettings.qml` and `ChargeControls.qml` only
 render it. When the helper changes, bump `HELPER_VERSION` in both `helper/charge-limit` and the
 logic file; the settings page then offers *Update helper*.
