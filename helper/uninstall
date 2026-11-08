@@ -1,0 +1,34 @@
+#!/bin/bash
+# Removes every file the DMS plugin "Framework Charge Protection" installed outside your
+# home directory. install.sh also copies this script next to the helper, so it stays
+# available after the plugin itself is removed:
+#
+#   pkexec /usr/local/libexec/dms-framework-charge-protection/uninstall
+#
+# It does not change the charge limit, and leaves framework_tool (framework-system) alone.
+
+set -euo pipefail
+export LC_ALL=C
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
+readonly HELPER_DIR=/usr/local/libexec/dms-framework-charge-protection
+readonly POLICY=/usr/share/polkit-1/actions/io.github.hbouttev.dms-framework-charge-protection.policy
+readonly LOCK_FILE=/run/dms-framework-charge-protection.lock
+
+if ((EUID != 0)); then
+    echo "error=run as root, e.g. pkexec $0" >&2
+    exit 3
+fi
+
+# The policy first: once it is gone, nothing can run the helper without a password.
+rm -f -- "$POLICY"
+rm -f -- "$HELPER_DIR/charge-limit" "$HELPER_DIR/.charge-limit.new" "$HELPER_DIR/.uninstall.new" "$LOCK_FILE"
+# Bash has already opened this script, so it can delete itself.
+rm -f -- "$HELPER_DIR/uninstall"
+rmdir -- "$HELPER_DIR" 2>/dev/null || true
+
+if [[ -e $POLICY || -e $HELPER_DIR ]]; then
+    echo "error=some files could not be removed; see $HELPER_DIR and $POLICY" >&2
+    exit 1
+fi
+echo "removed=yes"

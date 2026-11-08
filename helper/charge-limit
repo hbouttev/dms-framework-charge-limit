@@ -1,0 +1,142 @@
+#!/bin/bash
+# Privileged helper of the DMS plugin "Framework Charge Protection".
+#
+# install.sh copies this file, root-owned, to
+#   /usr/local/libexec/dms-framework-charge-protection/charge-limit
+# and installs a polkit action that lets the active local session run that copy through
+# pkexec without a password. It can do nothing but read the EC battery charge limit and set
+# it to a whole percentage from 25 to 100, through Framework's own framework_tool.
+#
+# Usage:
+#   charge-limit get          print the current limit
+#   charge-limit set <N>      set the limit to N (25-100), then read it back
+#   charge-limit info         print the helper version and the framework_tool it uses
+#                             (needs no privileges)
+#
+# Output is key=value lines on stdout (limit=, version=, tool=); errors are one
+# "error=<text>" line on stderr. Exit codes:
+#   0 success      2 invalid arguments     3 not running as root
+#   4 no trusted framework_tool            5 the EC did not answer as expected
+#   6 the limit read back differs from the one requested
+#   7 another charge-limit operation is still running
+
+set -uo pipefail
+export LC_ALL=C
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+umask 077
+
+readonly HELPER_VERSION=1
+readonly MIN_LIMIT=25
+readonly MAX_LIMIT=100
+readonly LOCK_FILE=/run/dms-framework-charge-protection.lock
+readonly TOOL_TIMEOUT=20
+# Only these locations are searched, and only a binary that root alone can modify is used.
+readonly TOOL_CANDIDATES=(/usr/bin/framework_tool /usr/local/bin/framework_tool /usr/sbin/framework_tool /usr/local/sbin/framework_tool)
+
+fail() {
+    local code=$1
+    shift
+    printf 'error=%s\n' "$*" >&2
+    exit "$code"
+}
+
+usage() {
+    fail 2 "usage: charge-limit get | set <$MIN_LIMIT-$MAX_LIMIT> | info"
+}
+
+# True when $1 exists and only root can modify it.
+root_only() {
+    local stat_out uid mode
+    stat_out=$(stat -Lc '%u %a' -- "$1" 2>/dev/null) || return 1
+    uid=${stat_out%% *}
+    mode=${stat_out##* }
+    [[ $uid == 0 ]] && (((8#$mode & 8#022) == 0))
+}
+
+# True when $1 is an executable file that only root can modify, as is every directory
+# above it, so that nobody else can swap it.
+trusted_executable() {
+    local path dir
+    path=$(readlink -e -- "$1" 2>/dev/null) || return 1
+    [[ -f $path && -x $path ]] || return 1
+    root_only "$path" || return 1
+    dir=${path%/*}
+    while [[ -n $dir ]]; do
+        root_only "$dir" || return 1
+        dir=${dir%/*}
+    done
+    root_only /
+}
+
+find_tool() {
+    local candidate
+    for candidate in "${TOOL_CANDIDATES[@]}"; do
+        if trusted_executable "$candidate"; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Last lines of a tool's output, printable characters only, for error messages.
+summarize() {
+    printf '%s' "$1" | tr -cd '[:print:]\n' | sed '/^[[:space:]]*$/d' | tail -n 2 | tr '\n' ' ' | cut -c 1-300
+}
+
+# Sets LIMIT, or LAST_OUTPUT on failure. framework_tool reports EC errors in its output but
+# still exits with 0, so success is only its "Minimum X%, Maximum Y%" line.
+read_limit() {
+    local out re='Maximum ([0-9]{1,3})%'
+    out=$(timeout -k 2 "$TOOL_TIMEOUT" "$TOOL" --charge-limit 2>&1)
+    if [[ $out =~ $re ]]; then
+        LIMIT=$((10#${BASH_REMATCH[1]}))
+        return 0
+    fi
+    LAST_OUTPUT=$out
+    return 1
+}
+
+lock() {
+    exec 9>>"$LOCK_FILE" || fail 7 "cannot open $LOCK_FILE"
+    flock -w 30 9 || fail 7 "another charge-limit operation is still running"
+}
+
+require_root_and_tool() {
+    ((EUID == 0)) || fail 3 "charge-limit must run as root (through pkexec)"
+    TOOL=$(find_tool) || fail 4 "framework_tool was not found in ${TOOL_CANDIDATES[*]}, or is not owned by root"
+    readonly TOOL
+}
+
+LIMIT=""
+LAST_OUTPUT=""
+
+case "${1:-}" in
+info)
+    (($# == 1)) || usage
+    printf 'version=%s\n' "$HELPER_VERSION"
+    printf 'tool=%s\n' "$(find_tool || true)"
+    ;;
+get)
+    (($# == 1)) || usage
+    require_root_and_tool
+    lock
+    read_limit || fail 5 "framework_tool could not read the charge limit: $(summarize "$LAST_OUTPUT")"
+    printf 'limit=%s\n' "$LIMIT"
+    ;;
+set)
+    (($# == 2)) || usage
+    [[ $2 =~ ^[0-9]{1,3}$ ]] || usage
+    requested=$((10#$2))
+    ((requested >= MIN_LIMIT && requested <= MAX_LIMIT)) || usage
+    require_root_and_tool
+    lock
+    timeout -k 2 "$TOOL_TIMEOUT" "$TOOL" --charge-limit "$requested" >/dev/null 2>&1
+    read_limit || fail 5 "framework_tool could not read the charge limit back: $(summarize "$LAST_OUTPUT")"
+    printf 'limit=%s\n' "$LIMIT"
+    ((LIMIT == requested)) || fail 6 "the EC reports $LIMIT% after setting $requested%"
+    ;;
+*)
+    usage
+    ;;
+esac

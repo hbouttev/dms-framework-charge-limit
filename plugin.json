@@ -1,0 +1,19 @@
+{
+    "id": "frameworkChargeProtection",
+    "name": "Framework Charge Protection",
+    "description": "Battery charge limit for Framework laptops, through framework_tool: toggle it from the bar or the Control Center, choose the maximum (25–99%), restore it after boot. On first use it installs a small root helper and a polkit rule, with your administrator password.",
+    "version": "1.0.0",
+    "author": "Hadrien Boutteville",
+    "type": "composite",
+    "capabilities": ["daemon", "dankbar-widget", "control-center"],
+    "icon": "battery_android_frame_shield",
+    "components": {
+        "daemon": "./ChargeDaemon.qml",
+        "widget": "./ChargeWidget.qml"
+    },
+    "settings": "./ChargeSettings.qml",
+    "startupCheck": "./StartupCheck.qml",
+    "requires_dms": ">=2.1.0",
+    "dependencies": ["framework-system (framework_tool)", "polkit (pkexec, pkcheck)", "bash"],
+    "permissions": ["settings_read", "settings_write", "process"]
+}
