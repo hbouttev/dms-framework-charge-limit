@@ -16,9 +16,10 @@ uses. The plugin runs that tool through a small root helper (see [Privileges](#p
 
 This is a community plugin, not affiliated with Framework Computer.
 
-<img src="assets/pill.png" width="130" alt="The bar pill: a battery with a shield and 80%">
+<img src="assets/popout.png" width="427" alt="The bar pill showing a shield and 80%, and its popout: charging stops at 80%, Limit charging on, Maximum charge when enabled 80% with − and + buttons">
 
-<img src="assets/settings.png" width="350" alt="The settings page: charging stops at 80%, Limit charging on, Maximum charge when enabled 80% with − and + buttons, Restore after boot on, Keep enforcing this limit off">
+<img src="assets/control-center.png" width="350" alt="The Control Center with the Charge limit tile (Stops at 80%) and its detail page showing the same controls">
+<img src="assets/settings.png" width="330" alt="The settings page: the controls, Behavior options (Restore after boot, Keep enforcing this limit, Check every, Allow full charge when turned off), Bar options, and the System helper section">
 
 ## Requirements
 
