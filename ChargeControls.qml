@@ -64,7 +64,7 @@ ColumnLayout {
             enabled: !root.working
             iconName: "refresh"
             buttonSize: Theme.buttonHeightXS
-            tooltipText: I18n.trFor("frameworkChargeProtection", "Read the charge limit again")
+            tooltipText: I18n.trFor("frameworkChargeLimit", "Read the charge limit again")
             Accessible.name: tooltipText
             onClicked: root.daemon.refresh("manual")
         }
@@ -105,7 +105,7 @@ ColumnLayout {
 
             DButton {
                 visible: root.needsSetup && root.daemon.helperState !== "no-polkit" && root.daemon.toolFound
-                text: root.daemon && root.daemon.helperState === "missing" ? I18n.trFor("frameworkChargeProtection", "Install helper") : I18n.trFor("frameworkChargeProtection", "Reinstall helper")
+                text: root.daemon && root.daemon.helperState === "missing" ? I18n.trFor("frameworkChargeLimit", "Install helper") : I18n.trFor("frameworkChargeLimit", "Reinstall helper")
                 iconName: "admin_panel_settings"
                 variant: "tonal"
                 busy: root.daemon && root.daemon.installing
@@ -127,7 +127,7 @@ ColumnLayout {
 
             StyledText {
                 Layout.fillWidth: true
-                text: I18n.trFor("frameworkChargeProtection", "Limit charging")
+                text: I18n.trFor("frameworkChargeLimit", "Limit charging")
                 font.pixelSize: Theme.fontSizeLarge
                 font.weight: Theme.fontWeightMedium
                 color: Theme.surfaceText
@@ -136,7 +136,7 @@ ColumnLayout {
 
             StyledText {
                 Layout.fillWidth: true
-                text: I18n.trFor("frameworkChargeProtection", "When disabled, charging is allowed up to 100%.")
+                text: I18n.trFor("frameworkChargeLimit", "When disabled, charging is allowed up to 100%.")
                 font.pixelSize: Theme.fontSizeSmall
                 color: Theme.surfaceVariantText
                 wrapMode: Text.Wrap
@@ -147,7 +147,7 @@ ColumnLayout {
             Layout.alignment: Qt.AlignVCenter
             checked: root.ready && root.daemon.displayOn
             enabled: root.ready && !root.daemon.installing && !root.daemon.uninstalling
-            Accessible.name: I18n.trFor("frameworkChargeProtection", "Limit charging")
+            Accessible.name: I18n.trFor("frameworkChargeLimit", "Limit charging")
             onToggled: checked => root.daemon.setEnabled(checked, true)
         }
     }
@@ -162,7 +162,7 @@ ColumnLayout {
 
             StyledText {
                 Layout.fillWidth: true
-                text: I18n.trFor("frameworkChargeProtection", "Maximum charge when enabled")
+                text: I18n.trFor("frameworkChargeLimit", "Maximum charge when enabled")
                 font.pixelSize: Theme.fontSizeLarge
                 font.weight: Theme.fontWeightMedium
                 color: Theme.surfaceText
@@ -171,7 +171,7 @@ ColumnLayout {
 
             StyledText {
                 Layout.fillWidth: true
-                text: root.ready && root.daemon.displayOn ? I18n.trFor("frameworkChargeProtection", "%1–%2%, applied right away.").arg(CL.MIN_LIMIT).arg(CL.MAX_PROTECTED_LIMIT) : I18n.trFor("frameworkChargeProtection", "%1–%2%, saved for the next time charging is limited.").arg(CL.MIN_LIMIT).arg(CL.MAX_PROTECTED_LIMIT)
+                text: root.ready && root.daemon.displayOn ? I18n.trFor("frameworkChargeLimit", "%1–%2%, applied right away.").arg(CL.MIN_LIMIT).arg(CL.MAX_PROTECTED_LIMIT) : I18n.trFor("frameworkChargeLimit", "%1–%2%, saved for the next time charging is limited.").arg(CL.MIN_LIMIT).arg(CL.MAX_PROTECTED_LIMIT)
                 font.pixelSize: Theme.fontSizeSmall
                 color: Theme.surfaceVariantText
                 wrapMode: Text.Wrap
@@ -188,7 +188,7 @@ ColumnLayout {
 
     StyledText {
         Layout.fillWidth: true
-        text: I18n.trFor("frameworkChargeProtection", "The battery percentage is not rescaled, and it may settle a few points below the limit: the embedded controller resumes charging only once it drops about 5% under it.")
+        text: I18n.trFor("frameworkChargeLimit", "The battery percentage is not rescaled, and it may settle a few points below the limit: the embedded controller resumes charging only once it drops about 5% under it.")
         font.pixelSize: Theme.fontSizeSmall
         color: Theme.surfaceVariantText
         wrapMode: Text.Wrap

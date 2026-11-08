@@ -2,8 +2,8 @@
 <!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <!--
-  Installed by the DMS plugin "Framework Charge Protection" (helper/install.sh) as
-  /usr/share/polkit-1/actions/io.github.hbouttev.dms-framework-charge-protection.policy
+  Installed by the DMS plugin "Framework Charge Limit" (helper/install.sh) as
+  /usr/share/polkit-1/actions/io.github.hbouttev.dms-framework-charge-limit.policy
 
   Lets the user of the active local session run exactly one program as root through pkexec
   without a password: the root-owned helper below, which can only read the battery charge
@@ -11,10 +11,10 @@
   the helper, still needs an administrator password.
 -->
 <policyconfig>
-  <vendor>Framework Charge Protection (DMS plugin)</vendor>
-  <vendor_url>https://github.com/hbouttev/dms-framework-battery-charge-protection</vendor_url>
+  <vendor>Framework Charge Limit (DMS plugin)</vendor>
+  <vendor_url>https://github.com/hbouttev/dms-framework-charge-limit</vendor_url>
 
-  <action id="io.github.hbouttev.dms-framework-charge-protection.charge-limit">
+  <action id="io.github.hbouttev.dms-framework-charge-limit.charge-limit">
     <description>Read or change the battery charge limit</description>
     <message>Authentication is required to change the battery charge limit</message>
     <icon_name>battery</icon_name>
@@ -23,6 +23,6 @@
       <allow_inactive>auth_admin</allow_inactive>
       <allow_active>yes</allow_active>
     </defaults>
-    <annotate key="org.freedesktop.policykit.exec.path">/usr/local/libexec/dms-framework-charge-protection/charge-limit</annotate>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/local/libexec/dms-framework-charge-limit/charge-limit</annotate>
   </action>
 </policyconfig>

@@ -1,8 +1,8 @@
 #!/bin/bash
-# Privileged helper of the DMS plugin "Framework Charge Protection".
+# Privileged helper of the DMS plugin "Framework Charge Limit".
 #
 # install.sh copies this file, root-owned, to
-#   /usr/local/libexec/dms-framework-charge-protection/charge-limit
+#   /usr/local/libexec/dms-framework-charge-limit/charge-limit
 # and installs a polkit action that lets the active local session run that copy through
 # pkexec without a password. It can do nothing but read the EC battery charge limit and set
 # it to a whole percentage from 25 to 100, through Framework's own framework_tool.
@@ -28,7 +28,7 @@ umask 077
 readonly HELPER_VERSION=1
 readonly MIN_LIMIT=25
 readonly MAX_LIMIT=100
-readonly LOCK_FILE=/run/dms-framework-charge-protection.lock
+readonly LOCK_FILE=/run/dms-framework-charge-limit.lock
 readonly TOOL_TIMEOUT=20
 # Only these locations are searched, and only a binary that root alone can modify is used.
 readonly TOOL_CANDIDATES=(/usr/bin/framework_tool /usr/local/bin/framework_tool /usr/sbin/framework_tool /usr/local/sbin/framework_tool)

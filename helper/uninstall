@@ -1,9 +1,9 @@
 #!/bin/bash
-# Removes every file the DMS plugin "Framework Charge Protection" installed outside your
+# Removes every file the DMS plugin "Framework Charge Limit" installed outside your
 # home directory. install.sh also copies this script next to the helper, so it stays
 # available after the plugin itself is removed:
 #
-#   pkexec /usr/local/libexec/dms-framework-charge-protection/uninstall
+#   pkexec /usr/local/libexec/dms-framework-charge-limit/uninstall
 #
 # It does not change the charge limit, and leaves framework_tool (framework-system) alone.
 
@@ -11,9 +11,9 @@ set -euo pipefail
 export LC_ALL=C
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
-readonly HELPER_DIR=/usr/local/libexec/dms-framework-charge-protection
-readonly POLICY=/usr/share/polkit-1/actions/io.github.hbouttev.dms-framework-charge-protection.policy
-readonly LOCK_FILE=/run/dms-framework-charge-protection.lock
+readonly HELPER_DIR=/usr/local/libexec/dms-framework-charge-limit
+readonly POLICY=/usr/share/polkit-1/actions/io.github.hbouttev.dms-framework-charge-limit.policy
+readonly LOCK_FILE=/run/dms-framework-charge-limit.lock
 
 if ((EUID != 0)); then
     echo "error=run as root, e.g. pkexec $0" >&2

@@ -52,7 +52,7 @@ Row {
         anchors.verticalCenter: parent.verticalCenter
         iconName: "remove"
         enabled: root.enabled && root.value > CL.MIN_LIMIT
-        tooltipText: I18n.trFor("frameworkChargeProtection", "Decrease by 1%")
+        tooltipText: I18n.trFor("frameworkChargeLimit", "Decrease by 1%")
         Accessible.name: tooltipText
         onClicked: root._step(-1)
     }
@@ -67,7 +67,7 @@ Row {
             regularExpression: /\d{0,2}/
         }
         isError: inputFocused && CL.parseLimitInput(text) === null
-        Accessible.name: I18n.trFor("frameworkChargeProtection", "Maximum charge when enabled, in percent")
+        Accessible.name: I18n.trFor("frameworkChargeLimit", "Maximum charge when enabled, in percent")
         onEditingFinished: root._commitText()
     }
 
@@ -82,7 +82,7 @@ Row {
         anchors.verticalCenter: parent.verticalCenter
         iconName: "add"
         enabled: root.enabled && root.value < CL.MAX_PROTECTED_LIMIT
-        tooltipText: I18n.trFor("frameworkChargeProtection", "Increase by 1%")
+        tooltipText: I18n.trFor("frameworkChargeLimit", "Increase by 1%")
         Accessible.name: tooltipText
         onClicked: root._step(1)
     }

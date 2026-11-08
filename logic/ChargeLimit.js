@@ -20,7 +20,7 @@ const EC_MIN_LIMIT = 20;
 const HELPER_VERSION = 1;
 const MIN_HELPER_VERSION = 1;
 
-const SYSTEM_NAME = "dms-framework-charge-protection";
+const SYSTEM_NAME = "dms-framework-charge-limit";
 const HELPER_DIR = `/usr/local/libexec/${SYSTEM_NAME}`;
 const HELPER_PATH = `${HELPER_DIR}/charge-limit`;
 const UNINSTALLER_PATH = `${HELPER_DIR}/uninstall`;

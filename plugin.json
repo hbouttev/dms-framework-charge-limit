@@ -1,6 +1,6 @@
 {
-    "id": "frameworkChargeProtection",
-    "name": "Framework Charge Protection",
+    "id": "frameworkChargeLimit",
+    "name": "Framework Charge Limit",
     "description": "Battery charge limit for Framework laptops, through framework_tool: toggle it from the bar or the Control Center, choose the maximum (25–99%), restore it after boot. On first use it installs a small root helper and a polkit rule, with your administrator password.",
     "version": "1.0.0",
     "author": "Hadrien Boutteville",

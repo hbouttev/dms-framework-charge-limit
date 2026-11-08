@@ -1,24 +1,24 @@
 #!/bin/bash
 # Installs, updates or removes the privileged helper of the DMS plugin
-# "Framework Charge Protection". Must run as root; the plugin runs it through pkexec,
+# "Framework Charge Limit". Must run as root; the plugin runs it through pkexec,
 # which asks for an administrator password:
 #
 #   pkexec /bin/bash helper/install.sh install     install or update
 #   pkexec /bin/bash helper/install.sh uninstall   remove
 #
 # Files written (and nothing else):
-#   /usr/local/libexec/dms-framework-charge-protection/charge-limit   the helper
-#   /usr/local/libexec/dms-framework-charge-protection/uninstall      removes all of this
-#   /usr/share/polkit-1/actions/io.github.hbouttev.dms-framework-charge-protection.policy
+#   /usr/local/libexec/dms-framework-charge-limit/charge-limit   the helper
+#   /usr/local/libexec/dms-framework-charge-limit/uninstall      removes all of this
+#   /usr/share/polkit-1/actions/io.github.hbouttev.dms-framework-charge-limit.policy
 
 set -euo pipefail
 export LC_ALL=C
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
 umask 022
 
-readonly HELPER_DIR=/usr/local/libexec/dms-framework-charge-protection
+readonly HELPER_DIR=/usr/local/libexec/dms-framework-charge-limit
 readonly POLICY_DIR=/usr/share/polkit-1/actions
-readonly POLICY=$POLICY_DIR/io.github.hbouttev.dms-framework-charge-protection.policy
+readonly POLICY=$POLICY_DIR/io.github.hbouttev.dms-framework-charge-limit.policy
 
 SRC_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 readonly SRC_DIR

@@ -27,7 +27,7 @@ PluginComponent {
         return limited ? Theme.primary : Theme.widgetIconColor;
     }
     readonly property bool pillShowsLimit: daemon !== null && limited && showLimit && status !== "setup"
-    readonly property string pillText: pillShowsLimit ? I18n.trFor("frameworkChargeProtection", "%1%").arg(daemon.displayLimit) : ""
+    readonly property string pillText: pillShowsLimit ? I18n.trFor("frameworkChargeLimit", "%1%").arg(daemon.displayLimit) : ""
 
     // Opens this widget's popout, bypassing pillClickAction.
     function openPanel() {
@@ -63,12 +63,12 @@ PluginComponent {
         PopoutComponent {
             id: popout
 
-            headerText: I18n.trFor("frameworkChargeProtection", "Charge limit")
+            headerText: I18n.trFor("frameworkChargeLimit", "Charge limit")
             headerActions: Component {
                 DActionButton {
                     iconName: "settings"
                     buttonSize: Theme.buttonHeightXS
-                    tooltipText: I18n.trFor("frameworkChargeProtection", "Plugin settings")
+                    tooltipText: I18n.trFor("frameworkChargeLimit", "Plugin settings")
                     Accessible.name: tooltipText
                     onClicked: {
                         if (popout.closePopout)
@@ -89,7 +89,7 @@ PluginComponent {
 
     // Never empty: DMS lists the tile only if a bare instance (without daemon) has an icon.
     ccWidgetIcon: pillIcon
-    ccWidgetPrimaryText: I18n.trFor("frameworkChargeProtection", "Charge limit")
+    ccWidgetPrimaryText: I18n.trFor("frameworkChargeLimit", "Charge limit")
     ccWidgetSecondaryText: texts.tileSubtitle(daemon)
     ccWidgetIsActive: limited
 

@@ -208,7 +208,7 @@ function fakeHelper(dir, { trustAnything }) {
     };
     replace("((EUID == 0)) ||", "true ||");
     replace(/readonly TOOL_CANDIDATES=\(.*\)/.exec(helper)[0], `readonly TOOL_CANDIDATES=(${dir}/framework_tool)`);
-    replace("readonly LOCK_FILE=/run/dms-framework-charge-protection.lock", `readonly LOCK_FILE=${dir}/lock`);
+    replace("readonly LOCK_FILE=/run/dms-framework-charge-limit.lock", `readonly LOCK_FILE=${dir}/lock`);
     if (trustAnything)
         replace('if trusted_executable "$candidate"; then', 'if [[ -x $candidate ]]; then');
     const path = join(dir, "charge-limit");

@@ -1,4 +1,4 @@
-# Framework Charge Protection for DMS
+# Framework Charge Limit for DMS
 
 A [Dux Shell (DMS)](https://duxlabs.dev/docs/dms/) plugin that controls the battery charge limit
 of Framework laptops from the bar, the Control Center and the settings page:
@@ -37,14 +37,14 @@ framework-system 0.6.6.
 
 ## Installation
 
-From DMS: Settings → Plugins → browse → *Framework Charge Protection*. Or by hand:
+From DMS: Settings → Plugins → browse → *Framework Charge Limit*. Or by hand:
 
 ```sh
-git clone https://github.com/hbouttev/dms-framework-battery-charge-protection \
-    ~/.config/dms/plugins/frameworkChargeProtection
+git clone https://github.com/hbouttev/dms-framework-charge-limit \
+    ~/.config/dms/plugins/frameworkChargeLimit
 ```
 
-then enable it in Settings → Plugins, and add the *Framework Charge Protection* widget to a bar
+then enable it in Settings → Plugins, and add the *Framework Charge Limit* widget to a bar
 (Settings → Bar widgets) and/or to the Control Center (edit mode → add widget).
 
 The first time you turn **Limit charging** on, from the pill, the Control Center tile or the
@@ -60,7 +60,7 @@ choice. Cancelling changes nothing. The settings page also has *Install helper*,
 | Popout | Status, **Limit charging**, **Maximum charge when enabled**, a re-read button and a link to the settings. |
 | Control Center tile | Click: toggle. Detail page: the same controls as the popout. |
 | Settings | The same controls, then the options below, and the helper's status and buttons. |
-| IPC | `dms ipc call frameworkChargeProtection status \| enable \| disable \| toggle \| limit <25-99> \| refresh`. These never ask for a password: without the helper they only say so. |
+| IPC | `dms ipc call frameworkChargeLimit status \| enable \| disable \| toggle \| limit <25-99> \| refresh`. These never ask for a password: without the helper they only say so. |
 
 ## How it behaves
 
@@ -119,9 +119,9 @@ Reading or changing the limit needs root. The helper is installed by
 
 | File | Purpose |
 | --- | --- |
-| `/usr/local/libexec/dms-framework-charge-protection/charge-limit` | the helper, root-owned ([source](helper/charge-limit)) |
-| `/usr/local/libexec/dms-framework-charge-protection/uninstall` | removes all three files ([source](helper/uninstall)) |
-| `/usr/share/polkit-1/actions/io.github.hbouttev.dms-framework-charge-protection.policy` | polkit action ([source](helper/polkit.policy)) |
+| `/usr/local/libexec/dms-framework-charge-limit/charge-limit` | the helper, root-owned ([source](helper/charge-limit)) |
+| `/usr/local/libexec/dms-framework-charge-limit/uninstall` | removes all three files ([source](helper/uninstall)) |
+| `/usr/share/polkit-1/actions/io.github.hbouttev.dms-framework-charge-limit.policy` | polkit action ([source](helper/polkit.policy)) |
 
 - The helper accepts only `get`, `set <25-100>` and `info`, validates its arguments, and runs
   nothing but `framework_tool --charge-limit [N]`, using a `framework_tool` that only root can
@@ -138,26 +138,26 @@ Reading or changing the limit needs root. The helper is installed by
 ### Removing the helper by hand
 
 ```sh
-pkexec /usr/local/libexec/dms-framework-charge-protection/uninstall
+pkexec /usr/local/libexec/dms-framework-charge-limit/uninstall
 ```
 
 or, if that file is gone:
 
 ```sh
-sudo rm -rf /usr/local/libexec/dms-framework-charge-protection \
-    /usr/share/polkit-1/actions/io.github.hbouttev.dms-framework-charge-protection.policy
+sudo rm -rf /usr/local/libexec/dms-framework-charge-limit \
+    /usr/share/polkit-1/actions/io.github.hbouttev.dms-framework-charge-limit.policy
 ```
 
 Neither changes the charge limit or removes framework-system.
 
 ## Troubleshooting
 
-- `dms ipc call frameworkChargeProtection status` prints the state, the last error and the
+- `dms ipc call frameworkChargeLimit status` prints the state, the last error and the
   helper status as JSON.
-- Plugin logs: `journalctl --user -u dms | grep frameworkChargeProtection`.
+- Plugin logs: `journalctl --user -u dms | grep frameworkChargeLimit`.
 - *polkit did not allow the helper without a password*: the session is not the active local one,
   or a local polkit rule overrides the action; check with
-  `pkcheck --action-id io.github.hbouttev.dms-framework-charge-protection.charge-limit --process $$`.
+  `pkcheck --action-id io.github.hbouttev.dms-framework-charge-limit.charge-limit --process $$`.
 - *framework_tool could not communicate with the embedded controller*: try
   `sudo framework_tool --charge-limit` in a terminal.
 
@@ -165,7 +165,7 @@ Neither changes the charge limit or removes framework-system.
 
 ```sh
 node tests/run.mjs                                  # logic and helper tests (fake framework_tool)
-dms ipc call plugins reload frameworkChargeProtection
+dms ipc call plugins reload frameworkChargeLimit
 ```
 
 [`logic/ChargeLimit.js`](logic/ChargeLimit.js) holds the pure logic (parsing, classification,

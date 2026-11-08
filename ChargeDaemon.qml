@@ -130,13 +130,13 @@ PluginComponent {
 
     // Built while the daemon is alive: Component.onDestruction cannot rely on children.
     readonly property var lifecycleTexts: ({
-            title: I18n.trFor("frameworkChargeProtection", "Framework Charge Protection"),
-            resetOk: I18n.trFor("frameworkChargeProtection", "The plugin was turned off, so charging is allowed up to 100% again."),
-            resetFailed: I18n.trFor("frameworkChargeProtection", "The plugin was turned off, but the charge limit could not be set back to 100%."),
-            question: I18n.trFor("frameworkChargeProtection", "The plugin was removed. Also remove its system helper? This asks for your administrator password."),
-            removeLabel: I18n.trFor("frameworkChargeProtection", "Remove helper"),
-            keepLabel: I18n.trFor("frameworkChargeProtection", "Keep"),
-            removed: I18n.trFor("frameworkChargeProtection", "The system helper was removed.")
+            title: I18n.trFor("frameworkChargeLimit", "Framework Charge Limit"),
+            resetOk: I18n.trFor("frameworkChargeLimit", "Charging is allowed up to 100% again."),
+            resetFailed: I18n.trFor("frameworkChargeLimit", "The charge limit could not be set back to 100%."),
+            question: I18n.trFor("frameworkChargeLimit", "The plugin was removed. Also remove its system helper? This asks for your administrator password."),
+            removeLabel: I18n.trFor("frameworkChargeLimit", "Remove helper"),
+            keepLabel: I18n.trFor("frameworkChargeLimit", "Keep"),
+            removed: I18n.trFor("frameworkChargeLimit", "The system helper was removed.")
         })
 
     // ---- Public API -------------------------------------------------------------------
@@ -210,13 +210,13 @@ PluginComponent {
         const remove = () => _run("uninstall", CL.installCommand(installScript, "uninstall"), (code, out, err) => {
                 if (code !== CL.EXIT.ok) {
                     _setError(CL.failureCode(code, "uninstall"), CL.errorDetail(err), "uninstall");
-                    _toastFailure(I18n.trFor("frameworkChargeProtection", "The helper was not removed"));
+                    _toastFailure(I18n.trFor("frameworkChargeLimit", "The helper was not removed"));
                 } else {
                     const stillLimited = hwKind === "limited";
                     _clearError();
                     _readQueued = "";
                     hwLimit = null;
-                    ToastService.showInfo(I18n.trFor("frameworkChargeProtection", "Charge limit helper removed"), stillLimited ? I18n.trFor("frameworkChargeProtection", "The current charge limit stays in place until another tool or the firmware changes it.") : "");
+                    ToastService.showInfo(I18n.trFor("frameworkChargeLimit", "Charge limit helper removed"), stillLimited ? I18n.trFor("frameworkChargeLimit", "The current charge limit stays in place until another tool or the firmware changes it.") : "");
                 }
                 probeHelper();
             });
@@ -290,7 +290,7 @@ PluginComponent {
             try {
                 done(code, out, err);
             } catch (e) {
-                console.warn("frameworkChargeProtection:", e.message);
+                console.warn("frameworkChargeLimit:", e.message);
             }
         }
         _drain();
@@ -345,7 +345,7 @@ PluginComponent {
                 selectedEnabled: selectedEnabled,
                 protectedLimit: protectedLimit
             }) !== null) {
-                console.info("frameworkChargeProtection: new boot, restoring", CL.targetLimit(selectedEnabled, protectedLimit) + "%", "(EC reports " + hwLimit + ")");
+                console.info("frameworkChargeLimit: new boot, restoring", CL.targetLimit(selectedEnabled, protectedLimit) + "%", "(EC reports " + hwLimit + ")");
                 _request(selectedEnabled, protectedLimit, "boot", null, hwLimit);
                 return;
             }
@@ -369,7 +369,7 @@ PluginComponent {
     function _adopt(r) {
         const known = selectedEnabled === true || selectedEnabled === false;
         if (known && hwLimit !== _lastAdoptedRaw) {
-            console.info("frameworkChargeProtection: charge limit changed outside the plugin to", hwLimit);
+            console.info("frameworkChargeLimit: charge limit changed outside the plugin to", hwLimit);
             externalChange = {
                 to: CL.effectiveMax(hwLimit),
                 at: Date.now(),
@@ -388,7 +388,7 @@ PluginComponent {
     function _enforce() {
         const t = Date.now();
         _corrections = CL.recentCorrections(_corrections, t).concat([t]);
-        console.info("frameworkChargeProtection: charge limit changed outside the plugin to", hwLimit + ", restoring it");
+        console.info("frameworkChargeLimit: charge limit changed outside the plugin to", hwLimit + ", restoring it");
         _request(selectedEnabled, protectedLimit, "enforce", null, hwLimit);
     }
 
@@ -449,7 +449,7 @@ PluginComponent {
                 else if (readBack === null && code !== CL.EXIT.noTool)
                     _readQueued = "after-failure";
                 if (d.origin !== "enforce" || errorStreak === 1)
-                    _toastFailure(target === CL.FULL_CHARGE ? I18n.trFor("frameworkChargeProtection", "Could not allow full charge") : I18n.trFor("frameworkChargeProtection", "Could not limit charging to %1%").arg(target));
+                    _toastFailure(target === CL.FULL_CHARGE ? I18n.trFor("frameworkChargeLimit", "Could not allow full charge") : I18n.trFor("frameworkChargeLimit", "Could not limit charging to %1%").arg(target));
             }
             if (d.after)
                 d.after(ok);
@@ -458,7 +458,7 @@ PluginComponent {
 
     function _announce(d, target) {
         if (d.origin === "boot") {
-            ToastService.showInfo(target === CL.FULL_CHARGE ? I18n.trFor("frameworkChargeProtection", "Charging allowed up to 100% again after boot") : I18n.trFor("frameworkChargeProtection", "Charge limit restored to %1% after boot").arg(target), d.from !== null ? I18n.trFor("frameworkChargeProtection", "The firmware had set it to %1%.").arg(CL.effectiveMax(d.from) ?? d.from) : "");
+            ToastService.showInfo(target === CL.FULL_CHARGE ? I18n.trFor("frameworkChargeLimit", "Charging allowed up to 100% again after boot") : I18n.trFor("frameworkChargeLimit", "Charge limit restored to %1% after boot").arg(target), d.from !== null ? I18n.trFor("frameworkChargeLimit", "The firmware had set it to %1%.").arg(CL.effectiveMax(d.from) ?? d.from) : "");
         } else if (d.origin === "enforce") {
             externalChange = {
                 to: CL.effectiveMax(d.from) ?? d.from,
@@ -466,10 +466,10 @@ PluginComponent {
                 corrected: true
             };
             const recent = CL.recentCorrections(_corrections, Date.now()).length;
-            let detail = I18n.trFor("frameworkChargeProtection", "Another program had changed it to %1%.").arg(CL.effectiveMax(d.from) ?? d.from);
+            let detail = I18n.trFor("frameworkChargeLimit", "Another program had changed it to %1%.").arg(CL.effectiveMax(d.from) ?? d.from);
             if (recent >= CL.CONFLICT_CORRECTIONS)
-                detail += " " + I18n.trFor("frameworkChargeProtection", "It was changed %1 times in the last hour: another tool, such as the battery limit of Framework Control, may be enforcing its own limit.").arg(recent);
-            ToastService.showWarning(target === CL.FULL_CHARGE ? I18n.trFor("frameworkChargeProtection", "Full charge restored") : I18n.trFor("frameworkChargeProtection", "Charge limit restored to %1%").arg(target), detail);
+                detail += " " + I18n.trFor("frameworkChargeLimit", "It was changed %1 times in the last hour: another tool, such as the battery limit of Framework Control, may be enforcing its own limit.").arg(recent);
+            ToastService.showWarning(target === CL.FULL_CHARGE ? I18n.trFor("frameworkChargeLimit", "Full charge restored") : I18n.trFor("frameworkChargeLimit", "Charge limit restored to %1%").arg(target), detail);
         }
     }
 
@@ -477,24 +477,24 @@ PluginComponent {
         if (busy)
             return false;
         if (probe && !probe.polkit) {
-            ToastService.showError(I18n.trFor("frameworkChargeProtection", "Cannot install the charge limit helper"), texts.helperStateText("no-polkit", 0));
+            ToastService.showError(I18n.trFor("frameworkChargeLimit", "Cannot install the charge limit helper"), texts.helperStateText("no-polkit", 0));
             return false;
         }
         if (probe && !toolFound) {
-            ToastService.showError(I18n.trFor("frameworkChargeProtection", "Cannot install the charge limit helper"), texts.noToolText());
+            ToastService.showError(I18n.trFor("frameworkChargeLimit", "Cannot install the charge limit helper"), texts.noToolText());
             return false;
         }
-        console.info("frameworkChargeProtection: installing the helper");
+        console.info("frameworkChargeLimit: installing the helper");
         _run("install", CL.installCommand(installScript, "install"), (code, out, err) => {
             if (code !== CL.EXIT.ok) {
                 _setError(CL.failureCode(code, "install"), CL.errorDetail(err), "install");
-                _toastFailure(I18n.trFor("frameworkChargeProtection", "The helper was not installed"));
+                _toastFailure(I18n.trFor("frameworkChargeLimit", "The helper was not installed"));
                 probeHelper();
                 return;
             }
             _clearError();
             _installedAt = Date.now();
-            ToastService.showInfo(I18n.trFor("frameworkChargeProtection", "Charge limit helper installed"));
+            ToastService.showInfo(I18n.trFor("frameworkChargeLimit", "Charge limit helper installed"));
             _afterInstall = then;
             // polkit loads the new policy asynchronously.
             postInstallTimer.restart();
@@ -511,7 +511,7 @@ PluginComponent {
         errorDetail = detail;
         errorOp = op;
         errorStreak++;
-        console.warn("frameworkChargeProtection:", op, "failed:", code, detail);
+        console.warn("frameworkChargeLimit:", op, "failed:", code, detail);
     }
 
     function _clearError() {
@@ -552,7 +552,7 @@ PluginComponent {
         }
         _bootPending = false;
         _markBootHandled();
-        _toastFailure(I18n.trFor("frameworkChargeProtection", "Could not restore the charge limit after boot"));
+        _toastFailure(I18n.trFor("frameworkChargeLimit", "Could not restore the charge limit after boot"));
     }
 
     function _markBootHandled() {
@@ -730,7 +730,7 @@ PluginComponent {
         onFinished: (exitCode, out, err) => {
             probeWatchdog.stop();
             root.probe = CL.parseProbe(out);
-            console.info("frameworkChargeProtection: helper", root.helperState, "(installed version", root.installedHelperVersion + ", bundled", root.bundledHelperVersion + "), framework_tool:", root.toolPath || "not found");
+            console.info("frameworkChargeLimit: helper", root.helperState, "(installed version", root.installedHelperVersion + ", bundled", root.bundledHelperVersion + "), framework_tool:", root.toolPath || "not found");
             const callbacks = root._probeCallbacks;
             root._probeCallbacks = [];
             for (const cb of callbacks)
@@ -750,9 +750,9 @@ PluginComponent {
         }
     }
 
-    // dms ipc call frameworkChargeProtection <function> [argument]
+    // dms ipc call frameworkChargeLimit <function> [argument]
     IpcHandler {
-        target: "frameworkChargeProtection"
+        target: "frameworkChargeLimit"
 
         function status(): string {
             return root.statusJson();
@@ -787,7 +787,7 @@ PluginComponent {
         if (started)
             return "applying";
         if (!helperUsable)
-            return "the helper is not installed: click the bar pill or use Settings → Plugins → Framework Charge Protection";
+            return "the helper is not installed: click the bar pill or use Settings → Plugins → Framework Charge Limit";
         return "busy";
     }
 }
