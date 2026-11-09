@@ -624,7 +624,7 @@ PluginComponent {
     Component.onCompleted: {
         _loadSettings();
         _restoreState();
-        bootIdProc.running = true;
+        bootIdFile.path = "/proc/sys/kernel/random/boot_id";
         probeHelper(() => _start());
     }
 
@@ -738,13 +738,17 @@ PluginComponent {
         }
     }
 
-    Process {
-        id: bootIdProc
-        command: ["cat", "/proc/sys/kernel/random/boot_id"]
-        stdout: StdioCollector {
-            onStreamFinished: root.bootId = text.trim()
+    // The path is set on startup. A failed read leaves bootId empty: restore after boot is
+    // then skipped rather than guessed.
+    FileView {
+        id: bootIdFile
+        printErrors: false
+        onLoaded: {
+            root.bootId = text().trim();
+            root._bootIdRead = true;
+            root._start();
         }
-        onExited: {
+        onLoadFailed: {
             root._bootIdRead = true;
             root._start();
         }

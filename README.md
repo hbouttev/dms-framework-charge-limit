@@ -29,7 +29,8 @@ This is a community plugin, not affiliated with Framework Computer.
 
 - DMS 2.1.1 or later.
 - A Framework laptop. The plugin refuses to load on other hardware (DMI vendor check).
-- `framework_tool` from **framework-system**, root-owned in `/usr/bin` or `/usr/local/bin`
+- `framework_tool` from **framework-system**, root-owned in `/usr/bin`, `/usr/local/bin`,
+  `/usr/sbin` or `/usr/local/sbin`
   (Arch/CachyOS: `pacman -S framework-system`; other distributions: your package, or the
   [release binary](https://github.com/FrameworkComputer/framework-system/releases) copied to
   `/usr/local/bin` as root). A copy in your home directory is never used.

@@ -57,7 +57,7 @@ PluginComponent {
             daemon.refresh("popout", 30 * 1000);
     }
 
-    popoutWidth: 420
+    popoutWidth: Theme.listItemHeight * 7.5
 
     popoutContent: Component {
         PopoutComponent {

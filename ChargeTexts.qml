@@ -48,7 +48,7 @@ QtObject {
     }
 
     function noToolText() {
-        return I18n.trFor("frameworkChargeLimit", "framework_tool was not found in /usr/bin or /usr/local/bin, or is not owned by root. Install Framework's framework-system package.");
+        return I18n.trFor("frameworkChargeLimit", "framework_tool was not found in /usr/bin, /usr/local/bin, /usr/sbin or /usr/local/sbin, or is not owned by root. Install Framework's framework-system package.");
     }
 
     // Helper installation state, for the settings page and the setup notice.
