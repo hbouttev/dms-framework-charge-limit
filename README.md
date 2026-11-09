@@ -27,7 +27,7 @@ This is a community plugin, not affiliated with Framework Computer.
 
 ## Requirements
 
-- DMS 2.1 or later.
+- DMS 2.1.1 or later.
 - A Framework laptop. The plugin refuses to load on other hardware (DMI vendor check).
 - `framework_tool` from **framework-system**, root-owned in `/usr/bin` or `/usr/local/bin`
   (Arch/CachyOS: `pacman -S framework-system`; other distributions: your package, or the
