@@ -73,13 +73,14 @@ PluginSettings {
     SelectionSetting {
         settingKey: "pillClick"
         label: I18n.trFor("frameworkChargeLimit", "Click on the pill")
+        description: I18n.trFor("frameworkChargeLimit", "A right click does the other.")
         options: [
             {
-                label: I18n.trFor("frameworkChargeLimit", "Toggle the limit (right click: panel)"),
+                label: I18n.trFor("frameworkChargeLimit", "Toggle the limit"),
                 value: "toggle"
             },
             {
-                label: I18n.trFor("frameworkChargeLimit", "Open the panel (right click: toggle)"),
+                label: I18n.trFor("frameworkChargeLimit", "Open the panel"),
                 value: "panel"
             }
         ]
@@ -162,7 +163,15 @@ PluginSettings {
     }
 
     SectionHeader {
-        text: I18n.trFor("frameworkChargeLimit", "Other tools")
+        text: I18n.trFor("frameworkChargeLimit", "Good to know")
+    }
+
+    StyledText {
+        width: parent.width
+        text: I18n.trFor("frameworkChargeLimit", "The battery percentage is not rescaled, and it may settle a few points below the limit: the embedded controller resumes charging only once it drops about 5% under it.")
+        font.pixelSize: Theme.fontSizeSmall
+        color: Theme.surfaceVariantText
+        wrapMode: Text.Wrap
     }
 
     StyledText {
@@ -173,11 +182,12 @@ PluginSettings {
         wrapMode: Text.Wrap
     }
 
+    // Same style as DMS's own settings section labels.
     component SectionHeader: StyledText {
         width: parent.width
         topPadding: Theme.spacingM
-        font.pixelSize: Theme.fontSizeLarge
-        font.weight: Font.Bold
-        color: Theme.surfaceText
+        font.pixelSize: Theme.fontSizeMedium
+        font.weight: Theme.fontWeightMedium
+        color: Theme.primary
     }
 }

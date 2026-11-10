@@ -20,10 +20,10 @@ helper (see [Privileges](#privileges)).
 
 This is a community plugin, not affiliated with Framework Computer.
 
-<img src="assets/popout.png" width="427" alt="The bar pill showing a shield and 80%, and its popout: charging stops at 80%, Limit charging on, Maximum charge when enabled 80% with − and + buttons">
+<img src="assets/popout.png" width="427" alt="The bar pill showing a shield and 80%, and its popout: a card saying charging stops at 80%, then Limit charging on and Maximum charge when enabled at 80%, set with a slider between − and + buttons">
 
 <img src="assets/control-center.png" width="350" alt="The Control Center with the Charge limit tile (Stops at 80%) and its detail page showing the same controls">
-<img src="assets/settings.png" width="330" alt="The settings page: the controls, Behavior options (Restore after boot, Keep enforcing this limit, Check every, Allow full charge when turned off), Bar options, and the System helper section">
+<img src="assets/settings.png" width="330" alt="The settings page: the controls, Behavior options (Restore after boot, Keep enforcing this limit, Check every, Allow full charge when turned off), Bar options, the System helper section, and notes under Good to know">
 
 ## Requirements
 
@@ -64,7 +64,7 @@ choice. Cancelling changes nothing. The settings page also has *Install helper*,
 | Surface | Behaviour |
 | --- | --- |
 | Bar pill | Shield icon and the limit while charging is limited; plain battery while charging up to 100%; question mark while setup is needed; warning icon when the limit cannot be read. Click: toggle the limit. Right click: popout. Both can be swapped in the settings. |
-| Popout | Status, **Limit charging**, **Maximum charge when enabled**, a re-read button and a link to the settings. |
+| Popout | Status, **Limit charging**, **Maximum charge when enabled** (a slider; − and + step by 1%), a re-read button and a link to the settings. |
 | Control Center tile | Click: toggle. Detail page: the same controls as the popout. |
 | Settings | The same controls, then the options below, and the helper's status and buttons. |
 | IPC | `dms ipc call frameworkChargeLimit status \| enable \| disable \| toggle \| limit <25-99> \| refresh`. These never ask for a password: without the helper they only say so. |

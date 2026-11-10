@@ -37,6 +37,10 @@ PluginComponent {
         pillClickAction = action;
     }
 
+    function openSettings() {
+        PopoutService.openSettingsWithTab("plugin:" + root.pluginId);
+    }
+
     function toggleLimit() {
         if (daemon)
             daemon.toggle(true);
@@ -60,27 +64,18 @@ PluginComponent {
     popoutWidth: Theme.listItemHeight * 7.5
 
     popoutContent: Component {
+        // No title bar: like DMS's battery popout, the hero card says what this is.
         PopoutComponent {
             id: popout
-
-            headerText: I18n.trFor("frameworkChargeLimit", "Charge limit")
-            headerActions: Component {
-                DActionButton {
-                    iconName: "settings"
-                    buttonSize: Theme.buttonHeightXS
-                    tooltipText: I18n.trFor("frameworkChargeLimit", "Plugin settings")
-                    Accessible.name: tooltipText
-                    onClicked: {
-                        if (popout.closePopout)
-                            popout.closePopout();
-                        PopoutService.openSettingsWithTab("plugin:" + root.pluginId);
-                    }
-                }
-            }
 
             ChargeControls {
                 width: parent.width
                 daemon: root.daemon
+                openSettings: () => {
+                    if (popout.closePopout)
+                        popout.closePopout();
+                    root.openSettings();
+                }
             }
         }
     }
@@ -99,17 +94,16 @@ PluginComponent {
             daemon.refresh("control-center", 30 * 1000);
     }
 
+    // The cards draw their own surfaces, as in DMS's battery detail.
     ccDetailContent: Component {
-        Rectangle {
-            implicitHeight: detailControls.implicitHeight + Theme.spacingM * 2
-            radius: Theme.cornerRadius
-            color: Theme.cardSurface
+        Item {
+            implicitHeight: detailControls.implicitHeight
 
             ChargeControls {
                 id: detailControls
-                anchors.fill: parent
-                anchors.margins: Theme.spacingM
+                width: parent.width
                 daemon: root.daemon
+                openSettings: () => root.openSettings()
             }
         }
     }
